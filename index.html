@@ -5,747 +5,145 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#ffffff">
   <title>Companhias Aéreas</title>
-  <style>
-    :root {
-      --yellow: #fff600;
-      --ink: #111111;
-      --muted: #666666;
-      --surface: #ffffff;
-      --soft: #f4f4f4;
-      --danger: #bd1e1e;
-      --shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      padding: 88px 24px 40px;
-      background: #fafafa;
-      color: var(--ink);
-      font-family: Arial, Helvetica, sans-serif;
-    }
-
-    button {
-      font: inherit;
-    }
-
-    .login-screen {
-      position: fixed;
-      inset: 0;
-      z-index: 100;
-      display: grid;
-      place-items: center;
-      padding: 24px;
-      background: #f3f3f3;
-    }
-
-    body.is-authenticated .login-screen {
-      display: none;
-    }
-
-    body:not(.is-authenticated) .page-actions,
-    body:not(.is-authenticated) .tables-grid {
-      display: none;
-    }
-
-    .login-card,
-    .settings-card {
-      width: min(400px, 100%);
-      padding: 30px;
-      border: 1px solid #dedede;
-      border-radius: 14px;
-      background: var(--surface);
-      box-shadow: var(--shadow);
-    }
-
-    .login-card h1,
-    .settings-card h2 {
-      margin: 0 0 8px;
-      font-size: 24px;
-    }
-
-    .login-description,
-    .settings-description {
-      margin: 0 0 24px;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.45;
-    }
-
-    .form-field {
-      display: grid;
-      gap: 7px;
-      margin-bottom: 16px;
-    }
-
-    .form-field label {
-      font-size: 14px;
-      font-weight: 700;
-    }
-
-    .form-field input {
-      width: 100%;
-      height: 44px;
-      padding: 0 12px;
-      border: 1px solid #bdbdbd;
-      border-radius: 8px;
-      background: #ffffff;
-      color: var(--ink);
-      font: inherit;
-      outline: none;
-    }
-
-    .form-field input:focus {
-      border-color: #8a7400;
-      box-shadow: 0 0 0 3px rgba(255, 230, 0, 0.3);
-    }
-
-    .primary-button {
-      width: 100%;
-      min-height: 44px;
-      padding: 0 16px;
-      border: 1px solid #111111;
-      border-radius: 8px;
-      background: var(--yellow);
-      color: var(--ink);
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .primary-button:hover {
-      background: #e9df00;
-    }
-
-    .form-message {
-      min-height: 20px;
-      margin: 12px 0 0;
-      color: var(--danger);
-      font-size: 13px;
-      text-align: center;
-    }
-
-    .page-actions {
-      position: fixed;
-      top: 20px;
-      right: 24px;
-      z-index: 10;
-      display: flex;
-      gap: 10px;
-    }
-
-    .icon-button,
-    .action-button {
-      min-height: 42px;
-      border: 1px solid #d4d4d4;
-      border-radius: 10px;
-      background: var(--surface);
-      color: var(--ink);
-      cursor: pointer;
-      box-shadow: 0 3px 14px rgba(0, 0, 0, 0.08);
-      transition: transform 0.15s ease, background 0.15s ease;
-    }
-
-    .icon-button {
-      width: 42px;
-      display: grid;
-      place-items: center;
-      padding: 0;
-    }
-
-    .action-button {
-      padding: 0 16px;
-      font-weight: 700;
-    }
-
-    .icon-button:hover,
-    .action-button:hover {
-      background: #f1f1f1;
-      transform: translateY(-1px);
-    }
-
-    .icon-button svg {
-      width: 20px;
-      height: 20px;
-    }
-
-    .tables-grid {
-      width: min(1180px, 100%);
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 62px;
-      align-items: start;
-    }
-
-    .table-card {
-      overflow: hidden;
-      background: var(--surface);
-      border-radius: 3px;
-      box-shadow: var(--shadow);
-    }
-
-    .table-title {
-      margin: 0;
-      padding: 8px 12px;
-      border: 2px solid var(--ink);
-      background: var(--surface);
-      text-align: center;
-      font-size: 16px;
-      font-weight: 700;
-      line-height: 1.15;
-    }
-
-    .table-toolbar {
-      display: none;
-      justify-content: flex-end;
-      padding: 10px;
-      border-right: 2px solid var(--ink);
-      border-left: 2px solid var(--ink);
-      background: var(--soft);
-    }
-
-    body.is-editing .table-toolbar {
-      display: flex;
-    }
-
-    .add-row {
-      padding: 7px 12px;
-      border: 1px solid #b8b8b8;
-      border-radius: 7px;
-      background: var(--surface);
-      color: var(--ink);
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .table-scroll {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      table-layout: fixed;
-    }
-
-    th,
-    td {
-      height: 42px;
-      padding: 8px 10px;
-      border: 2px solid var(--ink);
-      text-align: center;
-      vertical-align: middle;
-    }
-
-    th {
-      background: var(--yellow);
-      font-size: 14px;
-      font-weight: 700;
-    }
-
-    td {
-      background: var(--surface);
-      font-size: 14px;
-      overflow-wrap: anywhere;
-    }
-
-    th:nth-child(1),
-    td:nth-child(1) {
-      width: 24%;
-    }
-
-    th:nth-child(2),
-    td:nth-child(2) {
-      width: 24%;
-    }
-
-    th:nth-child(3),
-    td:nth-child(3) {
-      width: 52%;
-    }
-
-    body.is-editing td[contenteditable="true"] {
-      background: #fffef0;
-      outline: none;
-      cursor: text;
-    }
-
-    body.is-editing td[contenteditable="true"]:focus {
-      background: #fff9b8;
-      box-shadow: inset 0 0 0 2px #d2a900;
-    }
-
-    .delete-cell,
-    .delete-heading {
-      display: none;
-      width: 52px !important;
-      min-width: 52px;
-      padding: 4px;
-    }
-
-    body.is-editing .delete-cell,
-    body.is-editing .delete-heading {
-      display: table-cell;
-    }
-
-    .delete-row {
-      width: 32px;
-      height: 32px;
-      padding: 0;
-      border: 0;
-      border-radius: 7px;
-      background: transparent;
-      color: var(--danger);
-      font-size: 20px;
-      line-height: 1;
-      cursor: pointer;
-    }
-
-    .delete-row:hover {
-      background: #ffeaea;
-    }
-
-    .empty-note {
-      display: none;
-      margin: 0;
-      padding: 16px;
-      border: 2px solid var(--ink);
-      border-top: 0;
-      color: var(--muted);
-      text-align: center;
-      font-size: 14px;
-    }
-
-    .empty-note.is-visible {
-      display: block;
-    }
-
-    dialog {
-      width: min(440px, calc(100% - 28px));
-      padding: 0;
-      border: 0;
-      border-radius: 14px;
-      background: transparent;
-    }
-
-    dialog::backdrop {
-      background: rgba(0, 0, 0, 0.48);
-      backdrop-filter: blur(2px);
-    }
-
-    .settings-card {
-      width: 100%;
-    }
-
-    .settings-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 22px;
-    }
-
-    .settings-actions .primary-button {
-      width: auto;
-      flex: 1 1 140px;
-    }
-
-    .secondary-button,
-    .danger-button {
-      min-height: 44px;
-      padding: 0 16px;
-      border: 1px solid #c7c7c7;
-      border-radius: 8px;
-      background: #ffffff;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .danger-button {
-      border-color: #f0b3b3;
-      color: var(--danger);
-    }
-
-    .settings-success {
-      color: #14752e;
-    }
-
-    [hidden] {
-      display: none !important;
-    }
-
-    @media (max-width: 820px) {
-      body {
-        padding: 82px 14px 28px;
-      }
-
-      .page-actions {
-        top: 16px;
-        right: 14px;
-      }
-
-      .tables-grid {
-        grid-template-columns: 1fr;
-        gap: 34px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      th,
-      td {
-        padding: 7px 5px;
-        font-size: 12px;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./app.js" defer></script>
 </head>
 <body>
-  <section class="login-screen" aria-labelledby="loginTitle">
+  <section id="loginScreen" class="login-screen" aria-labelledby="loginTitle">
     <form id="loginForm" class="login-card">
       <h1 id="loginTitle">Acesso</h1>
-      <p class="login-description">Entre para consultar e editar as tabelas de companhias aéreas.</p>
+      <p class="description">Entre para consultar e editar as tabelas de companhias aéreas.</p>
+
       <div class="form-field">
         <label for="loginUsername">Usuário</label>
         <input id="loginUsername" name="username" type="text" autocomplete="username" required autofocus>
       </div>
+
       <div class="form-field">
         <label for="loginPassword">Senha</label>
         <input id="loginPassword" name="password" type="password" autocomplete="current-password" required>
       </div>
+
       <button class="primary-button" type="submit">Entrar</button>
       <p id="loginMessage" class="form-message" role="alert"></p>
     </form>
   </section>
 
-  <div class="page-actions" aria-label="Ações da página">
-    <button id="settingsButton" class="icon-button" type="button" aria-label="Configurações de acesso" title="Configurações de acesso">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="3"></circle>
-        <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21H9.6v-.1A1.7 1.7 0 0 0 8.5 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3V9.6h.1A1.7 1.7 0 0 0 4.6 8.5a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3h4v.1A1.7 1.7 0 0 0 15.5 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.13.38.35.73.65 1 .3.27.68.4 1.05.4h.1v4h-.1c-.4 0-.77.14-1.05.4-.3.27-.52.62-.65 1Z"></path>
-      </svg>
-    </button>
-    <button id="cancelButton" class="action-button" type="button" hidden>Cancelar</button>
-    <button id="editButton" class="icon-button" type="button" aria-label="Editar tabelas" title="Editar tabelas">
-      <svg id="pencilIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M12 20h9"></path>
-        <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
-      </svg>
-      <svg id="checkIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden>
-        <path d="m5 12 4 4L19 6"></path>
-      </svg>
-    </button>
+  <div id="app" hidden>
+    <div class="page-actions" aria-label="Ações da página">
+      <span id="syncStatus" class="sync-status" aria-live="polite">Dados compartilhados</span>
+
+      <button id="settingsButton" class="icon-button" type="button" aria-label="Configurações de acesso" title="Configurações de acesso">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21H9.6v-.1A1.7 1.7 0 0 0 8.5 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3V9.6h.1A1.7 1.7 0 0 0 4.6 8.5a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3h4v.1A1.7 1.7 0 0 0 15.5 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.13.38.35.73.65 1 .3.27.68.4 1.05.4h.1v4h-.1c-.4 0-.77.14-1.05.4-.3.27-.52.62-.65 1Z"></path>
+        </svg>
+      </button>
+
+      <button id="cancelButton" class="action-button" type="button" hidden>Cancelar</button>
+
+      <button id="editButton" class="icon-button" type="button" aria-label="Editar tabelas" title="Editar tabelas">
+        <svg id="pencilIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 20h9"></path>
+          <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+        </svg>
+        <svg id="checkIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden>
+          <path d="m5 12 4 4L19 6"></path>
+        </svg>
+      </button>
+    </div>
+
+    <aside id="migrationBanner" class="migration-banner" hidden>
+      <div>
+        <strong>Dados antigos encontrados neste navegador</strong>
+        <p>Importe-os uma única vez para que apareçam em todos os dispositivos.</p>
+      </div>
+      <div class="migration-actions">
+        <button id="dismissMigrationButton" class="secondary-button" type="button">Agora não</button>
+        <button id="importLocalButton" class="primary-button compact" type="button">Importar dados</button>
+      </div>
+    </aside>
+
+    <main class="tables-grid">
+      <section class="table-card" data-table="internacional">
+        <h2 class="table-title">INTERNACIONAL</h2>
+        <div class="table-toolbar">
+          <button class="add-row" type="button">+ Inserir linha</button>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>SIGLA 834</th>
+                <th>IBM</th>
+                <th>CIA AÉREA</th>
+                <th class="delete-heading" aria-label="Excluir"></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="empty-note">Nenhuma linha cadastrada. Clique no lápis e insira uma linha.</p>
+      </section>
+
+      <section class="table-card" data-table="nacional">
+        <h2 class="table-title">NACIONAL</h2>
+        <div class="table-toolbar">
+          <button class="add-row" type="button">+ Inserir linha</button>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>SIGLA 834</th>
+                <th>IBM</th>
+                <th>CIA AÉREA</th>
+                <th class="delete-heading" aria-label="Excluir"></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="empty-note">Nenhuma linha cadastrada. Clique no lápis e insira uma linha.</p>
+      </section>
+    </main>
   </div>
-
-  <main class="tables-grid">
-    <section class="table-card" data-table="internacional">
-      <h2 class="table-title">INTERNACIONAL</h2>
-      <div class="table-toolbar">
-        <button class="add-row" type="button">+ Inserir linha</button>
-      </div>
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>SIGLA 834</th>
-              <th>IBM</th>
-              <th>CIA AÉREA</th>
-              <th class="delete-heading" aria-label="Excluir"></th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <p class="empty-note">Nenhuma linha cadastrada. Clique no lápis e insira uma linha.</p>
-    </section>
-
-    <section class="table-card" data-table="nacional">
-      <h2 class="table-title">NACIONAL</h2>
-      <div class="table-toolbar">
-        <button class="add-row" type="button">+ Inserir linha</button>
-      </div>
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>SIGLA 834</th>
-              <th>IBM</th>
-              <th>CIA AÉREA</th>
-              <th class="delete-heading" aria-label="Excluir"></th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <p class="empty-note">Nenhuma linha cadastrada. Clique no lápis e insira uma linha.</p>
-    </section>
-  </main>
 
   <dialog id="settingsDialog" aria-labelledby="settingsTitle">
     <form id="settingsForm" class="settings-card">
       <h2 id="settingsTitle">Configurações de acesso</h2>
-      <p class="settings-description">Altere o usuário e a senha usados para entrar nesta página.</p>
+      <p class="description">A alteração valerá para todos os dispositivos.</p>
+
       <div class="form-field">
-        <label for="settingsUsername">Usuário</label>
-        <input id="settingsUsername" type="text" autocomplete="username" required>
+        <label for="settingsUsername">Novo usuário</label>
+        <input id="settingsUsername" type="text" autocomplete="username" minlength="3" maxlength="60" required>
       </div>
+
+      <div class="form-field">
+        <label for="currentPassword">Senha atual</label>
+        <input id="currentPassword" type="password" autocomplete="current-password" required>
+      </div>
+
       <div class="form-field">
         <label for="settingsPassword">Nova senha</label>
-        <input id="settingsPassword" type="password" autocomplete="new-password" minlength="4" required>
+        <input id="settingsPassword" type="password" autocomplete="new-password" minlength="10" maxlength="128" required>
       </div>
+
       <div class="form-field">
         <label for="settingsPasswordConfirm">Confirmar nova senha</label>
-        <input id="settingsPasswordConfirm" type="password" autocomplete="new-password" minlength="4" required>
+        <input id="settingsPasswordConfirm" type="password" autocomplete="new-password" minlength="10" maxlength="128" required>
       </div>
+
       <p id="settingsMessage" class="form-message" role="alert"></p>
+
       <div class="settings-actions">
         <button id="logoutButton" class="danger-button" type="button">Sair</button>
         <button id="closeSettingsButton" class="secondary-button" type="button">Cancelar</button>
-        <button class="primary-button" type="submit">Salvar</button>
+        <button class="primary-button compact" type="submit">Salvar</button>
       </div>
     </form>
   </dialog>
 
-  <script>
-    (() => {
-      const STORAGE_KEY = "companhias-aereas-tabelas-v1";
-      const CREDENTIALS_KEY = "companhias-aereas-acesso-v1";
-      const SESSION_KEY = "companhias-aereas-sessao-v1";
-      const DEFAULT_CREDENTIALS = {
-        username: "Operador",
-        password: "operacao2026"
-      };
-      const emptyData = {
-        internacional: [["", "", ""]],
-        nacional: [["", "", ""]]
-      };
-
-      const editButton = document.getElementById("editButton");
-      const cancelButton = document.getElementById("cancelButton");
-      const settingsButton = document.getElementById("settingsButton");
-      const settingsDialog = document.getElementById("settingsDialog");
-      const settingsForm = document.getElementById("settingsForm");
-      const settingsUsername = document.getElementById("settingsUsername");
-      const settingsPassword = document.getElementById("settingsPassword");
-      const settingsPasswordConfirm = document.getElementById("settingsPasswordConfirm");
-      const settingsMessage = document.getElementById("settingsMessage");
-      const closeSettingsButton = document.getElementById("closeSettingsButton");
-      const logoutButton = document.getElementById("logoutButton");
-      const loginForm = document.getElementById("loginForm");
-      const loginUsername = document.getElementById("loginUsername");
-      const loginPassword = document.getElementById("loginPassword");
-      const loginMessage = document.getElementById("loginMessage");
-      const pencilIcon = document.getElementById("pencilIcon");
-      const checkIcon = document.getElementById("checkIcon");
-      let isEditing = false;
-      let data = loadData();
-      let credentials = loadCredentials();
-      let backup = null;
-
-      function loadCredentials() {
-        try {
-          const saved = JSON.parse(localStorage.getItem(CREDENTIALS_KEY));
-          if (saved?.username && saved?.password) {
-            return saved;
-          }
-        } catch (error) {
-          console.warn("Não foi possível carregar os dados de acesso.", error);
-        }
-        return { ...DEFAULT_CREDENTIALS };
-      }
-
-      function setAuthenticated(value) {
-        document.body.classList.toggle("is-authenticated", value);
-        if (value) {
-          sessionStorage.setItem(SESSION_KEY, "active");
-        } else {
-          sessionStorage.removeItem(SESSION_KEY);
-          loginForm.reset();
-          loginMessage.textContent = "";
-          setTimeout(() => loginUsername.focus(), 0);
-        }
-      }
-
-      function loadData() {
-        try {
-          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-          if (saved && Array.isArray(saved.internacional) && Array.isArray(saved.nacional)) {
-            return saved;
-          }
-        } catch (error) {
-          console.warn("Não foi possível carregar os dados salvos.", error);
-        }
-        return structuredClone(emptyData);
-      }
-
-      function saveData() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      }
-
-      function renderAll() {
-        document.querySelectorAll("[data-table]").forEach((section) => {
-          renderTable(section.dataset.table);
-        });
-      }
-
-      function renderTable(tableName) {
-        const section = document.querySelector(`[data-table="${tableName}"]`);
-        const tbody = section.querySelector("tbody");
-        const emptyNote = section.querySelector(".empty-note");
-        tbody.replaceChildren();
-
-        data[tableName].forEach((row, rowIndex) => {
-          const tr = document.createElement("tr");
-
-          for (let columnIndex = 0; columnIndex < 3; columnIndex += 1) {
-            const td = document.createElement("td");
-            td.textContent = row[columnIndex] ?? "";
-            td.contentEditable = String(isEditing);
-            td.spellcheck = false;
-            td.addEventListener("input", () => {
-              data[tableName][rowIndex][columnIndex] = td.textContent.trim();
-            });
-            td.addEventListener("keydown", (event) => {
-              if (event.key === "Enter") {
-                event.preventDefault();
-                td.blur();
-              }
-            });
-            tr.appendChild(td);
-          }
-
-          const deleteCell = document.createElement("td");
-          deleteCell.className = "delete-cell";
-          const deleteButton = document.createElement("button");
-          deleteButton.className = "delete-row";
-          deleteButton.type = "button";
-          deleteButton.setAttribute("aria-label", `Excluir linha ${rowIndex + 1}`);
-          deleteButton.title = "Excluir linha";
-          deleteButton.textContent = "×";
-          deleteButton.addEventListener("click", () => {
-            data[tableName].splice(rowIndex, 1);
-            renderTable(tableName);
-          });
-          deleteCell.appendChild(deleteButton);
-          tr.appendChild(deleteCell);
-          tbody.appendChild(tr);
-        });
-
-        emptyNote.classList.toggle("is-visible", data[tableName].length === 0);
-      }
-
-      function setEditing(value) {
-        isEditing = value;
-        document.body.classList.toggle("is-editing", value);
-        cancelButton.hidden = !value;
-        pencilIcon.hidden = value;
-        checkIcon.hidden = !value;
-        editButton.setAttribute("aria-label", value ? "Salvar alterações" : "Editar tabelas");
-        editButton.title = value ? "Salvar alterações" : "Editar tabelas";
-        renderAll();
-      }
-
-      editButton.addEventListener("click", () => {
-        if (!isEditing) {
-          backup = structuredClone(data);
-          setEditing(true);
-          return;
-        }
-
-        saveData();
-        backup = null;
-        setEditing(false);
-      });
-
-      cancelButton.addEventListener("click", () => {
-        if (backup) {
-          data = backup;
-        }
-        backup = null;
-        setEditing(false);
-      });
-
-      document.querySelectorAll(".add-row").forEach((button) => {
-        button.addEventListener("click", () => {
-          const tableName = button.closest("[data-table]").dataset.table;
-          data[tableName].push(["", "", ""]);
-          renderTable(tableName);
-          const newRow = button.closest("[data-table]").querySelector("tbody tr:last-child td");
-          newRow?.focus();
-        });
-      });
-
-      loginForm.addEventListener("submit", (event) => {
-        event.preventDefault();
-        const usernameIsCorrect = loginUsername.value.trim() === credentials.username;
-        const passwordIsCorrect = loginPassword.value === credentials.password;
-
-        if (!usernameIsCorrect || !passwordIsCorrect) {
-          loginMessage.textContent = "Usuário ou senha incorretos.";
-          loginPassword.value = "";
-          loginPassword.focus();
-          return;
-        }
-
-        loginMessage.textContent = "";
-        setAuthenticated(true);
-      });
-
-      settingsButton.addEventListener("click", () => {
-        settingsUsername.value = credentials.username;
-        settingsPassword.value = "";
-        settingsPasswordConfirm.value = "";
-        settingsMessage.textContent = "";
-        settingsMessage.classList.remove("settings-success");
-        settingsDialog.showModal();
-        settingsUsername.focus();
-      });
-
-      closeSettingsButton.addEventListener("click", () => {
-        settingsDialog.close();
-      });
-
-      settingsDialog.addEventListener("click", (event) => {
-        if (event.target === settingsDialog) {
-          settingsDialog.close();
-        }
-      });
-
-      settingsForm.addEventListener("submit", (event) => {
-        event.preventDefault();
-        const newUsername = settingsUsername.value.trim();
-        const newPassword = settingsPassword.value;
-
-        if (newPassword !== settingsPasswordConfirm.value) {
-          settingsMessage.classList.remove("settings-success");
-          settingsMessage.textContent = "As duas senhas não são iguais.";
-          settingsPasswordConfirm.focus();
-          return;
-        }
-
-        credentials = { username: newUsername, password: newPassword };
-        localStorage.setItem(CREDENTIALS_KEY, JSON.stringify(credentials));
-        settingsMessage.classList.add("settings-success");
-        settingsMessage.textContent = "Dados de acesso alterados.";
-        settingsPassword.value = "";
-        settingsPasswordConfirm.value = "";
-      });
-
-      logoutButton.addEventListener("click", () => {
-        settingsDialog.close();
-        if (isEditing && backup) {
-          data = backup;
-          backup = null;
-          setEditing(false);
-        }
-        setAuthenticated(false);
-      });
-
-      renderAll();
-      setAuthenticated(sessionStorage.getItem(SESSION_KEY) === "active");
-    })();
-  </script>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 </body>
 </html>
