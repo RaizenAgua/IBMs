@@ -18,6 +18,7 @@
     loginForm: document.getElementById("loginForm"),
     loginUsername: document.getElementById("loginUsername"),
     loginPassword: document.getElementById("loginPassword"),
+    loginRemember: document.getElementById("loginRemember"),
     loginMessage: document.getElementById("loginMessage"),
     app: document.getElementById("app"),
     editButton: document.getElementById("editButton"),
@@ -51,13 +52,29 @@
     return !API_BASE_URL.includes("SEU-WORKER") && API_BASE_URL.startsWith("https://");
   }
 
+  function getStoredToken() {
+    return sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY);
+  }
+
+  function storeToken(token, remember) {
+    sessionStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(TOKEN_KEY);
+    const storage = remember ? localStorage : sessionStorage;
+    storage.setItem(TOKEN_KEY, token);
+  }
+
+  function clearStoredToken() {
+    sessionStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(TOKEN_KEY);
+  }
+
   async function api(path, options = {}) {
     if (!configuredApiUrl()) {
       throw new Error("O endereço do servidor ainda não foi configurado no arquivo app.js.");
     }
 
     const headers = new Headers(options.headers || {});
-    const token = sessionStorage.getItem(TOKEN_KEY);
+    const token = getStoredToken();
     if (token) {
       headers.set("Authorization", `Bearer ${token}`);
     }
@@ -89,7 +106,7 @@
   }
 
   function showLogin(message = "") {
-    sessionStorage.removeItem(TOKEN_KEY);
+    clearStoredToken();
     elements.app.hidden = true;
     elements.loginScreen.hidden = false;
     elements.loginMessage.textContent = message;
@@ -317,10 +334,11 @@
         method: "POST",
         body: JSON.stringify({
           username: elements.loginUsername.value.trim(),
-          password: elements.loginPassword.value
+          password: elements.loginPassword.value,
+          remember: elements.loginRemember.checked
         })
       });
-      sessionStorage.setItem(TOKEN_KEY, payload.token);
+      storeToken(payload.token, elements.loginRemember.checked);
       elements.loginPassword.value = "";
       await showApp(payload.username);
     } catch (error) {
@@ -451,7 +469,7 @@
   });
 
   setInterval(() => {
-    const authenticated = Boolean(sessionStorage.getItem(TOKEN_KEY));
+    const authenticated = Boolean(getStoredToken());
     if (authenticated && !isEditing && !elements.app.hidden) {
       loadSharedData(true);
     }
@@ -463,7 +481,7 @@
       return;
     }
 
-    const token = sessionStorage.getItem(TOKEN_KEY);
+    const token = getStoredToken();
     if (!token) {
       showLogin();
       return;
