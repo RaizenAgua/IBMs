@@ -10,7 +10,8 @@
   const emptyState = () => ({
     version: 0,
     internacional: [],
-    nacional: []
+    nacional: [],
+    executiva: []
   });
 
   const elements = {
@@ -29,6 +30,8 @@
     settingsButton: document.getElementById("settingsButton"),
     settingsDialog: document.getElementById("settingsDialog"),
     settingsForm: document.getElementById("settingsForm"),
+    settingsDescription: document.getElementById("settingsDescription"),
+    adminSettingsFields: document.getElementById("adminSettingsFields"),
     settingsUsername: document.getElementById("settingsUsername"),
     currentPassword: document.getElementById("currentPassword"),
     settingsPassword: document.getElementById("settingsPassword"),
@@ -36,6 +39,7 @@
     settingsMessage: document.getElementById("settingsMessage"),
     closeSettingsButton: document.getElementById("closeSettingsButton"),
     logoutButton: document.getElementById("logoutButton"),
+    settingsSaveButton: document.getElementById("settingsSaveButton"),
     migrationBanner: document.getElementById("migrationBanner"),
     importLocalButton: document.getElementById("importLocalButton"),
     dismissMigrationButton: document.getElementById("dismissMigrationButton"),
@@ -46,6 +50,7 @@
   let backup = null;
   let isEditing = false;
   let currentUsername = "";
+  let currentRole = "operator";
   let toastTimer = null;
 
   function configuredApiUrl() {
@@ -114,10 +119,12 @@
     setTimeout(() => elements.loginUsername.focus(), 0);
   }
 
-  async function showApp(username) {
+  async function showApp(username, role) {
     currentUsername = username;
+    currentRole = role === "admin" ? "admin" : "operator";
     elements.loginScreen.hidden = true;
     elements.app.hidden = false;
+    setEditing(false);
     await loadSharedData();
     checkLegacyData();
   }
@@ -147,7 +154,8 @@
       state = {
         version: payload.version,
         internacional: payload.internacional,
-        nacional: payload.nacional
+        nacional: payload.nacional,
+        executiva: payload.executiva || []
       };
       renderAll();
       setSyncStatus("Dados compartilhados", "ok");
@@ -218,10 +226,14 @@
   }
 
   function setEditing(value) {
+    if (value && currentRole !== "admin") {
+      return;
+    }
     isEditing = value;
     document.body.classList.toggle("is-editing", value);
     elements.cancelButton.hidden = !value;
     elements.settingsButton.hidden = value;
+    elements.editButton.hidden = currentRole !== "admin";
     elements.pencilIcon.hidden = value;
     elements.checkIcon.hidden = !value;
     elements.editButton.setAttribute("aria-label", value ? "Salvar alterações" : "Editar tabelas");
@@ -230,6 +242,11 @@
   }
 
   async function saveSharedData() {
+    if (currentRole !== "admin") {
+      showToast("Somente o administrador pode editar as tabelas.");
+      return false;
+    }
+
     setSyncStatus("Salvando…", "working");
     elements.editButton.disabled = true;
     elements.cancelButton.disabled = true;
@@ -240,7 +257,8 @@
         body: JSON.stringify({
           version: state.version,
           internacional: state.internacional,
-          nacional: state.nacional
+          nacional: state.nacional,
+          executiva: state.executiva
         })
       });
 
@@ -261,6 +279,12 @@
       }
       if (error.status === 401) {
         showLogin("Sua sessão terminou. Entre novamente.");
+        return false;
+      }
+      if (error.status === 403) {
+        backup = null;
+        setEditing(false);
+        showToast("Somente o administrador pode editar as tabelas.");
         return false;
       }
       setSyncStatus("Erro ao salvar", "error");
@@ -300,6 +324,10 @@
   }
 
   function checkLegacyData() {
+    if (currentRole !== "admin") {
+      elements.migrationBanner.hidden = true;
+      return;
+    }
     const dismissed = localStorage.getItem(MIGRATION_DISMISSED_KEY) === "yes";
     elements.migrationBanner.hidden = dismissed || !readLegacyData();
   }
@@ -340,7 +368,7 @@
       });
       storeToken(payload.token, elements.loginRemember.checked);
       elements.loginPassword.value = "";
-      await showApp(payload.username);
+      await showApp(payload.username, payload.role);
     } catch (error) {
       elements.loginMessage.textContent = error.message;
       elements.loginPassword.value = "";
@@ -351,6 +379,9 @@
   });
 
   elements.editButton.addEventListener("click", async () => {
+    if (currentRole !== "admin") {
+      return;
+    }
     if (!isEditing) {
       backup = structuredClone(state);
       setEditing(true);
@@ -370,6 +401,9 @@
 
   document.querySelectorAll(".add-row").forEach((button) => {
     button.addEventListener("click", () => {
+      if (currentRole !== "admin") {
+        return;
+      }
       const tableName = button.closest("[data-table]").dataset.table;
       state[tableName].push({ sigla834: "", ibm: "", ciaAerea: "" });
       renderTable(tableName);
@@ -379,13 +413,23 @@
   });
 
   elements.settingsButton.addEventListener("click", () => {
+    const isAdmin = currentRole === "admin";
+    elements.adminSettingsFields.hidden = !isAdmin;
+    elements.settingsSaveButton.hidden = !isAdmin;
+    elements.settingsDescription.textContent = isAdmin
+      ? "Altere o usuário e a senha do administrador."
+      : "Acesso de operador: consulta das tabelas, sem permissão para editar.";
     elements.settingsUsername.value = currentUsername;
     elements.currentPassword.value = "";
     elements.settingsPassword.value = "";
     elements.settingsPasswordConfirm.value = "";
     elements.settingsMessage.textContent = "";
     elements.settingsDialog.showModal();
-    elements.settingsUsername.focus();
+    if (isAdmin) {
+      elements.settingsUsername.focus();
+    } else {
+      elements.closeSettingsButton.focus();
+    }
   });
 
   elements.closeSettingsButton.addEventListener("click", () => {
@@ -401,6 +445,11 @@
   elements.settingsForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     elements.settingsMessage.textContent = "";
+
+    if (currentRole !== "admin") {
+      elements.settingsMessage.textContent = "Somente o administrador pode alterar as credenciais.";
+      return;
+    }
 
     if (elements.settingsPassword.value !== elements.settingsPasswordConfirm.value) {
       elements.settingsMessage.textContent = "As duas senhas novas não são iguais.";
@@ -445,6 +494,10 @@
   });
 
   elements.importLocalButton.addEventListener("click", async () => {
+    if (currentRole !== "admin") {
+      elements.migrationBanner.hidden = true;
+      return;
+    }
     const legacy = readLegacyData();
     if (!legacy) {
       elements.migrationBanner.hidden = true;
@@ -489,7 +542,7 @@
 
     try {
       const payload = await api("/api/session");
-      await showApp(payload.username);
+      await showApp(payload.username, payload.role);
     } catch {
       showLogin();
     }

@@ -111,32 +111,55 @@
         </div>
         <p class="empty-note">Nenhuma linha cadastrada. Clique no lápis e insira uma linha.</p>
       </section>
+
+      <section class="table-card" data-table="executiva">
+        <h2 class="table-title">EXECUTIVA</h2>
+        <div class="table-toolbar">
+          <button class="add-row" type="button">+ Inserir linha</button>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>SIGLA 834</th>
+                <th>IBM</th>
+                <th>CIA AÉREA</th>
+                <th class="delete-heading" aria-label="Excluir"></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="empty-note">Nenhuma linha cadastrada. Clique no lápis e insira uma linha.</p>
+      </section>
     </main>
   </div>
 
   <dialog id="settingsDialog" aria-labelledby="settingsTitle">
     <form id="settingsForm" class="settings-card">
       <h2 id="settingsTitle">Configurações de acesso</h2>
-      <p class="description">A alteração valerá para todos os dispositivos.</p>
+      <p id="settingsDescription" class="description">A alteração valerá para todos os dispositivos.</p>
 
-      <div class="form-field">
-        <label for="settingsUsername">Novo usuário</label>
-        <input id="settingsUsername" type="text" autocomplete="username" minlength="3" maxlength="60" required>
-      </div>
+      <div id="adminSettingsFields">
+        <div class="form-field">
+          <label for="settingsUsername">Novo usuário administrador</label>
+          <input id="settingsUsername" type="text" autocomplete="username" minlength="3" maxlength="60" required>
+        </div>
 
-      <div class="form-field">
-        <label for="currentPassword">Senha atual</label>
-        <input id="currentPassword" type="password" autocomplete="current-password" required>
-      </div>
+        <div class="form-field">
+          <label for="currentPassword">Senha atual</label>
+          <input id="currentPassword" type="password" autocomplete="current-password" required>
+        </div>
 
-      <div class="form-field">
-        <label for="settingsPassword">Nova senha</label>
-        <input id="settingsPassword" type="password" autocomplete="new-password" minlength="10" maxlength="128" required>
-      </div>
+        <div class="form-field">
+          <label for="settingsPassword">Nova senha</label>
+          <input id="settingsPassword" type="password" autocomplete="new-password" minlength="10" maxlength="128" required>
+        </div>
 
-      <div class="form-field">
-        <label for="settingsPasswordConfirm">Confirmar nova senha</label>
-        <input id="settingsPasswordConfirm" type="password" autocomplete="new-password" minlength="10" maxlength="128" required>
+        <div class="form-field">
+          <label for="settingsPasswordConfirm">Confirmar nova senha</label>
+          <input id="settingsPasswordConfirm" type="password" autocomplete="new-password" minlength="10" maxlength="128" required>
+        </div>
       </div>
 
       <p id="settingsMessage" class="form-message" role="alert"></p>
@@ -144,7 +167,7 @@
       <div class="settings-actions">
         <button id="logoutButton" class="danger-button" type="button">Sair</button>
         <button id="closeSettingsButton" class="secondary-button" type="button">Cancelar</button>
-        <button class="primary-button compact" type="submit">Salvar</button>
+        <button id="settingsSaveButton" class="primary-button compact" type="submit">Salvar</button>
       </div>
     </form>
   </dialog>
